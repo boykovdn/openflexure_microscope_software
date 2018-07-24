@@ -300,6 +300,8 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                 n = 0
                 while os.path.isfile(os.path.join(filepath % n)):
                     n += 1
+                camera._set_exif_tags({'EXIF.UserComment':'User comment test.',
+                                        'EXIF.MakerNote':'Maker note test.'})
                 camera.capture(filepath % n, format="jpeg", bayer=True)
                 camera.annotate_text="Saved '%s'" % (filepath % n)
                 time.sleep(0.5)
