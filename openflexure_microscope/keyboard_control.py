@@ -264,6 +264,12 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                      'd': [-1,0,0],
                      'q': [0,0,-1],
                      'e': [0,0,1]}
+
+        metadata = {'patient_id': '00000000',
+                    'sample_id': '00',
+                    'slide_id': '00'
+                    }
+
         while True:
             c = readkey()
             if c == 'x': #quit
@@ -300,12 +306,14 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                 n = 0
                 while os.path.isfile(os.path.join(filepath % n)):
                     n += 1
-                camera._set_exif_tags({'EXIF.UserComment':'User comment test.',
-                                        'EXIF.MakerNote':'Maker note test.'})
+                #Store information in exif tags
+                camera._exif_tags = {'EXIF.UserComment': '{}-{}-{}'.format(metadata['patient_id'], metadata['sample_id'], metadata['slide_id']),
+                                        'EXIF.MakerNote':'Maker note test.'} # TODO Fix character encoding warning
                 camera.capture(filepath % n, format="jpeg", bayer=True)
                 camera.annotate_text="Saved '%s'" % (filepath % n)
                 time.sleep(0.5)
                 camera.annotate_text=""
+                print("Captured to: " + filepath) # TODO Change filename to give more information?
             elif c == "k":
                 camera.stop_preview()
                 new_filepath = input("The new output location can be a directory or \n"
@@ -315,9 +323,18 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                 if len(new_filepath) > 3:
                     filepath = validate_filepath(new_filepath)
                 print("New output filepath: %s\n" % filepath)
-
-    
-
+            elif c == "<":
+                new_patient_id = input("Enter patient ID:\n>")
+                metadata['patient_id'] = new_patient_id
+                print("Patient " + metadata['patient_id'])
+            elif c == ">":
+                new_sample_id = input("Enter sample ID:\n>")
+                metadata['sample_id'] = new_sample_id
+                print("Sample " + metadata['sample_id'])
+            elif c == "?":
+                new_slide_id = input("Enter slide ID:\n>")
+                metadata['slide_id'] = new_slide_id
+                print("Slide " + metadata['slide_id'])
 
 if __name__ == '__main__':
     args = parse_command_line_arguments()
