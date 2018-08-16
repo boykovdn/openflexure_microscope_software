@@ -5,7 +5,7 @@ import picamera
 import numpy as np
 import sys
 import time
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 def lens_shading_correction_from_rgb(rgb_array, binsize=64):
     """Calculate a correction to a lens shading table from an RGB image.
