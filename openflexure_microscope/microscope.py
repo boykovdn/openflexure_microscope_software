@@ -6,7 +6,7 @@ import numpy as np
 import scipy
 from scipy import ndimage
 import time
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from openflexure_stage import OpenFlexureStage
 from contextlib import contextmanager, closing
 import os
