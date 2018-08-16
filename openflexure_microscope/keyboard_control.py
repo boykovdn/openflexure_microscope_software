@@ -306,14 +306,9 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                 n = 0
                 while os.path.isfile(os.path.join(filepath % n)):
                     n += 1
-<<<<<<< HEAD
                 #Store information in exif tags
                 camera._exif_tags = {'EXIF.UserComment': '{}-{}-{}'.format(metadata['patient_id'], metadata['sample_id'], metadata['slide_id']),
                                         'EXIF.MakerNote':'Maker note test.'} # TODO Fix character encoding warning
-=======
-                camera._set_exif_tags({'EXIF.UserComment':'User comment test.',
-                                        'EXIF.MakerNote':'Maker note test.'})
->>>>>>> a407945f7f7b10693ff4dbb7d71ae7f4e88ec26d
                 camera.capture(filepath % n, format="jpeg", bayer=True)
                 camera.annotate_text="Saved '%s'" % (filepath % n)
                 time.sleep(0.5)
