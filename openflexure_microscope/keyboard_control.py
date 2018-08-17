@@ -246,13 +246,6 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
         camera = ms.camera
         stage = ms.stage
         camera.annotate_text_size=50
-        print("wasd to move in X/Y, qe for Z\n"
-              "r/f to decrease/increase step size.\n"
-              "v/b to start/stop video preview.\n"
-              "i/o to zoom in/out.\n"
-              "[/] to select camera parameters, and +/- to adjust them\n"
-              "j to save jpeg file, k to change output path.\n"
-              "x to quit")
         control_parameters = control_parameters_from_microscope(ms)
         current_parameter = 0
         parameter = control_parameters[current_parameter]
@@ -267,8 +260,25 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
 
         metadata = {'patient_id': '00000000',
                     'sample_id': '00',
-                    'slide_id': '00'
+                    'slide_id': '00',
+                    'operator_id': 'undefined'
                     }
+
+        # Operator login
+        operator_id = input('Please enter your Operator ID:\n>')
+        if len(operator_id) == 0:
+            print("Operator ID undefined. Please press SHIFT + n to change for data collection.")
+        else:
+            metadata['operator_id'] = operator_id
+
+        # TODO Class for keymapping
+        print("wasd to move in X/Y, qe for Z\n"
+              "r/f to decrease/increase step size.\n"
+              "v/b to start/stop video preview.\n"
+              "i/o to zoom in/out.\n"
+              "[/] to select camera parameters, and +/- to adjust them\n"
+              "j to save jpeg file, k to change output path.\n"
+              "x to quit")
 
         while True:
             c = readkey()
@@ -308,8 +318,10 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                     n += 1
                 # Store information in exif tags
                 # WARNING Picamera will crash if a (string) tag longer than 153 characters is passed.
+                # TODO Class containing exif tag <-> data mapping
                 camera._exif_tags = {'EXIF.UserComment': '{}-{}-{}'.format(metadata['patient_id'], metadata['sample_id'], metadata['slide_id']),
-                                        'EXIF.MakerNote':'Maker note test.'} # TODO Fix character encoding warning
+                                        'EXIF.MakerNote': metadata['operator_id']} # TODO Fix character encoding warning
+                # TODO Camera sometimes captures a 720x480 image?
                 camera.capture(filepath % n, format="jpeg", bayer=True)
                 camera.annotate_text="Saved '%s'" % (filepath % n)
                 time.sleep(0.5)
@@ -360,6 +372,14 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                 else:
                     metadata['slide_id'] = new_slide_id
                     print("Slide " + metadata['slide_id'])
+
+            elif c == "N":
+                camera.stop_preview()
+                new_operator_id = input("Enter operator ID:\n>")
+                if len(new_operator_id) == 0:
+                    print("NO CHANGE: Operator " + metadata['operator_id'])
+                else:
+                    metadata['operator_id'] = new_operator_id
 
 if __name__ == '__main__':
     args = parse_command_line_arguments()
