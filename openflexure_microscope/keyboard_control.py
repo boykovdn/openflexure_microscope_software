@@ -343,8 +343,8 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                 # TODO Checksum. Will IDs be pre-generated?
                 if len(new_patient_id) == 0:
                     print("NO CHANGE: Current Patient ID: " + metadata['patient_id'])
-                elif len(new_patient_id) != 8:
-                    print("NO CHANGE: Patient ID must be 8 digits long. Current Patient ID: " + metadata['patient_id']) # TODO Check whether input is a valid number (if ID will be numerical)
+                elif len(new_patient_id) != 4:
+                    print("NO CHANGE: Patient ID must be 4 digits long. Current Patient ID: " + metadata['patient_id']) # TODO Check whether input is a valid AnonID
                 else:
                     metadata['patient_id'] = new_patient_id
                     print("Patient " + metadata['patient_id'])
