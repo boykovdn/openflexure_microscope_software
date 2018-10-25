@@ -219,6 +219,7 @@ def image_grid(ms):
                 if autofocus:
                     ms.autofocus(np.linspace(-autofocus_range//2,autofocus_range//2,11))
                 time.sleep(1)
+                ms.camera._exif_tags = {'EXIF.UserComment': '{}-{}-{}'.format(ms.metadata['patient_id'], ms.metadata['sample_id'], ms.metadata['slide_id']), 'EXIF.MakerNote': ms.metadata['operator_id']} 
                 ms.camera.capture(output_dir+"/{}_{}.jpg".format(j,i), format="jpeg", bayer=save_raw)
                 ms.camera.annotate_text="Saved '{}', moving".format(output_dir+"/{}_{}.jpg".format(j,i))
                 #do not move after the last image, we'll move in y
@@ -299,18 +300,12 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                      'q': [0,0,-1],
                      'e': [0,0,1]}
 
-        metadata = {'patient_id': '00000000',
-                    'sample_id': '00',
-                    'slide_id': '00',
-                    'operator_id': 'undefined'
-                    }
-
         # Operator login
         operator_id = input('Please enter your Operator ID:\n>')
         if len(operator_id) == 0:
             print("Operator ID undefined. Please press SHIFT + n to change for data collection.")
         else:
-            metadata['operator_id'] = operator_id
+            ms.metadata['operator_id'] = operator_id
 
         # TODO Class for keymapping
         print("wasd to move in X/Y, qe for Z\n"
@@ -360,9 +355,8 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
                 # Store information in exif tags
                 # WARNING Picamera will crash if a (string) tag longer than 153 characters is passed.
                 # TODO Class containing exif tag <-> data mapping
-                camera._exif_tags = {'EXIF.UserComment': '{}-{}-{}'.format(metadata['patient_id'], metadata['sample_id'], metadata['slide_id']),
-                                        'EXIF.MakerNote': metadata['operator_id']} # TODO Fix character encoding warning
-                # TODO Camera sometimes captures a 720x480 image?
+                camera._exif_tags = {'EXIF.UserComment': '{}-{}-{}'.format(ms.metadata['patient_id'], ms.metadata['sample_id'], ms.metadata['slide_id']),
+                                        'EXIF.MakerNote': ms.metadata['operator_id']} # TODO Fix character encoding warning
                 camera.capture(filepath % n, format="jpeg", bayer=True)
                 camera.annotate_text="Saved '%s'" % (filepath % n)
                 time.sleep(0.5)
@@ -381,45 +375,45 @@ def control_microscope_with_keyboard(output="./images", dummy_stage=False, setti
             elif c == "<":
                 camera.stop_preview()
                 new_patient_id = input("Enter patient ID (leave blank to exit):\n>")
-                # TODO Checksum. Will IDs be pre-generated?
+                # TODO Checksum
                 if len(new_patient_id) == 0:
-                    print("NO CHANGE: Current Patient ID: " + metadata['patient_id'])
+                    print("NO CHANGE: Current Patient ID: " + ms.metadata['patient_id'])
                 elif len(new_patient_id) != 4:
-                    print("NO CHANGE: Patient ID must be 4 digits long. Current Patient ID: " + metadata['patient_id']) # TODO Check whether input is a valid AnonID
+                    print("NO CHANGE: Patient ID must be 4 digits long. Current Patient ID: " + ms.metadata['patient_id'])
                 else:
-                    metadata['patient_id'] = new_patient_id
-                    print("Patient " + metadata['patient_id'])
+                    ms.metadata['patient_id'] = new_patient_id
+                    print("Patient " + ms.metadata['patient_id'])
 
             elif c == ">":
                 camera.stop_preview()
                 new_sample_id = input("Enter sample ID:\n>")
                 if len(new_sample_id) == 0:
-                    print("NO CHANGE: Current Sample ID: " + metadata['sample_id'])
+                    print("NO CHANGE: Current Sample ID: " + ms.metadata['sample_id'])
                 elif len(new_sample_id) != 2:
-                    print("NO CHANGE: Sample ID must be 2 digits long. Current Sample ID: " + metadata['sample_id'])
+                    print("NO CHANGE: Sample ID must be 2 digits long. Current Sample ID: " + ms.metadata['sample_id'])
                 else:
-                    metadata['sample_id'] = new_sample_id
-                    print("Sample " + metadata['sample_id'])
+                    ms.metadata['sample_id'] = new_sample_id
+                    print("Sample " + ms.metadata['sample_id'])
 
             elif c == "?":
                 camera.stop_preview()
                 new_slide_id = input("Enter slide ID:\n>")
 
                 if len(new_slide_id) == 0:
-                    print("NO CHANGE: Current slide ID: " + metadata['slide_id'])
+                    print("NO CHANGE: Current slide ID: " + ms.metadata['slide_id'])
                 elif len(new_slide_id) != 2:
-                    print("NO CHANGE: Slide ID must be 2 digits long. Current Slide ID: " + metadata['slide_id'])
+                    print("NO CHANGE: Slide ID must be 2 digits long. Current Slide ID: " + ms.metadata['slide_id'])
                 else:
-                    metadata['slide_id'] = new_slide_id
-                    print("Slide " + metadata['slide_id'])
+                    ms.metadata['slide_id'] = new_slide_id
+                    print("Slide " + ms.metadata['slide_id'])
 
             elif c == "N":
                 camera.stop_preview()
                 new_operator_id = input("Enter operator ID:\n>")
                 if len(new_operator_id) == 0:
-                    print("NO CHANGE: Operator " + metadata['operator_id'])
+                    print("NO CHANGE: Operator " + ms.metadata['operator_id'])
                 else:
-                    metadata['operator_id'] = new_operator_id
+                    ms.metadata['operator_id'] = new_operator_id
 
 if __name__ == '__main__':
     args = parse_command_line_arguments()

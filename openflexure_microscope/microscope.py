@@ -102,6 +102,10 @@ class Microscope(object):
         self.camera = camera
         self.stage = stage
         self.stage.backlash = np.zeros(3, dtype=np.int)
+        self.metadata = {'patient_id' : '0000', # 4 alphanumerical characters
+                         'sample_id' : '00',
+                         'slide_id' : '00',
+                         'operator_id' : 'undefined'}
 
     def close(self):
         """Shut down the microscope hardware."""
